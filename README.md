@@ -1,41 +1,63 @@
-### Hi there 👋
+# Amazon Scraper (Selenium + SQLite)
 
-- 🔭 I’m currently working on my personnal project on data science
-- 🌱 I’m currently learning python and R
-<!--
-**Sedrickgael/Sedrickgael** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Scrape les résultats de recherche d'Amazon.fr avec Selenium et stocke les produits dans une base SQLite. Architecture MVC.
 
-Here are some ideas to get you started:
+## Installation
 
+```bash
+cd amazon_scraper
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
+Google Chrome (ou Edge) doit être installé.
 
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+Par défaut (`BACKEND = "cdp"` dans `config.py`), le projet pilote directement ton Chrome via son port de débogage : aucun `chromedriver.exe` n'est téléchargé, ce qui évite les blocages Windows (Smart App Control, `WinError 4551`). Mets `BACKEND = "selenium"` pour utiliser Selenium classique.
 
-### ⚙️ &nbsp;GitHub Analytics
+## Utilisation
 
-<div align="center">
-  <h4> 
-    🏃 Happy Coding 🏃 
-  </h4>
-</div>
-<p align="center">
-  <a href="https://github.com/Sedrickgael">
-    <img height="180em" src="https://github-readme-stats-eight-theta.vercel.app/api?username=Sedrickgael&show_icons=true&theme=algolia&include_all_commits=true&count_private=true"/>
-    <img height="180em" src="https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=Sedrickgael&layout=compact&langs_count=8&theme=algolia"/>
-  </a>
-</p>
+```bash
+python main.py                         # menu interactif
+python main.py scrape "clavier" -p 3   # scrape 3 pages
+python main.py scrape "souris" --headless
+python main.py tech -p 2               # toute la catégorie tech + sous-catégories -> CSV
+python main.py tech -c Informatique    # une seule catégorie
+python main.py list                    # affiche les produits en base
+python main.py search "logitech"       # recherche dans la base
+python main.py export                  # CSV + JSON dans exports/
+```
 
-<br/>
-### Let's Connect :coffee:
-<p align="center">
-	<a href="https://github.com/Sedrickgael"><img src="https://img.icons8.com/bubbles/50/000000/github.png" alt="GitHub"/></a>
-	<a href="https://www.linkedin.com/in/sedrickgael/"><img src="https://img.icons8.com/bubbles/50/000000/linkedin.png" alt="LinkedIn"/></a>
-	<a href="https://www.facebook.com/gael.kaseg"><img src="https://img.icons8.com/bubbles/50/000000/facebook-new.png" alt="Facebook"/></a>
-	<a href="https://gitlab.com/Sedrickgael"><img src="https://img.icons8.com/bubbles/50/000000/code-fork.png" alt="GitLab"/></a>
-</p>
+## Structure
+
+```
+amazon_scraper/
+├── main.py                  # point d'entrée (CLI + menu)
+├── config.py                # paramètres (URL, délais, chemins)
+├── models/produit.py        # dataclass Produit + ProduitRepository (SQLite)
+├── scraper/
+│   ├── amazon_scraper.py    # pilotage Selenium (navigation, pagination)
+│   └── parsing.py           # extraction/nettoyage des champs d'une carte
+├── controllers/
+│   └── scraping_controller.py
+├── views/
+│   ├── console_view.py      # affichage terminal
+│   └── export_view.py       # export CSV / JSON
+├── data/produits.db         # base SQLite (créée automatiquement)
+└── exports/                 # fichiers exportés
+```
+
+## Catégorie tech
+
+Les catégories et sous-catégories sont définies dans `config.py` (`TECH_CATEGORIES`) : chaque sous-catégorie est lancée comme une recherche Amazon, sur `TECH_PAGES` pages. Les produits sont sauvegardés en base au fil de l'eau, puis un fichier `exports/tech_AAAAMMJJ_HHMMSS.csv` (séparateur `;`, colonnes `categorie` et `sous_categorie` incluses) est généré à la fin, même si un captcha interrompt le scraping.
+
+## Base de données
+
+Table `produits` : `asin` (unique), `titre`, `prix`, `note`, `nb_avis`, `url`, `image_url`, `requete`, `categorie`, `sous_categorie`, `date_scraping`.
+Un produit déjà présent (même ASIN) est mis à jour, pas dupliqué.
+
+## Notes
+
+- Amazon peut afficher un captcha si tu scrapes trop vite : garde des délais (`DELAY_MIN/MAX`) et peu de pages.
+- Les sélecteurs CSS d'Amazon changent parfois : ils sont regroupés dans `scraper/parsing.py` pour être faciles à ajuster.
+- Vérifie les conditions d'utilisation d'Amazon et n'utilise ce projet qu'à des fins d'apprentissage / personnelles.
