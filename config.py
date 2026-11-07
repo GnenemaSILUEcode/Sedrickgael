@@ -1,52 +1,23 @@
-"""Configuration globale du projet."""
+# -*- coding: utf-8 -*-
+"""
+CONFIG : tous les réglages au même endroit (chemins, noms des enseignes, panier, dates).
+Si l'énoncé change (autre panier, autre semaine), on ne modifie que ce fichier.
+"""
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-EXPORT_DIR = os.path.join(BASE_DIR, "exports")
-DB_PATH = os.path.join(DATA_DIR, "produits.db")
+DOSSIER_PROJET = os.path.dirname(os.path.abspath(__file__))
+DOSSIER_DONNEES = os.path.join(DOSSIER_PROJET, "donnees")
+DOSSIER_RESULTATS = os.path.join(DOSSIER_PROJET, "resultats")
 
-BASE_URL = "https://www.amazon.fr"
-SEARCH_URL = BASE_URL + "/s?k={query}&page={page}"
+# Noms écrits EXACTEMENT comme dans historique_prix.csv (colonne "source")
+ML = "Marché Lagune"
+BB = "Baobab Shop"
+CI = "Comptoir Ivoire"
+ENSEIGNES = [ML, BB, CI]
 
-HEADLESS = False          # True = navigateur invisible
-PAGE_TIMEOUT = 15         # secondes d'attente max pour un élément
-DELAY_MIN = 2.0           # pause aléatoire entre deux pages (secondes)
-DELAY_MAX = 5.0
-MAX_PAGES = 2             # pages par recherche (par défaut)
+# Panier de rentrée : produit_id -> quantité
+PANIER = {"P04": 1, "P12": 1, "P14": 2, "P15": 1, "P28": 1}
 
-# "cdp"      : pilote ton Chrome/Edge directement (aucun chromedriver.exe)
-# "selenium" : Selenium classique (télécharge chromedriver.exe)
-BACKEND = "cdp"
-CHROME_PATH = ""          # optionnel : chemin de chrome.exe si non trouvé automatiquement
-
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-)
-
-os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(EXPORT_DIR, exist_ok=True)
-
-# Catégorie tech -> sous-catégories (chaque sous-catégorie = une recherche Amazon).
-# Modifie / complète librement cette liste.
-TECH_CATEGORIES = {
-    "Informatique": [
-        "ordinateur portable", "pc de bureau", "ecran pc", "clavier", "souris",
-        "imprimante", "disque dur externe", "ssd", "carte graphique",
-        "routeur wifi", "tablette tactile",
-    ],
-    "High-Tech": [
-        "smartphone", "casque audio", "ecouteurs bluetooth", "enceinte bluetooth",
-        "montre connectee", "television", "appareil photo", "drone",
-        "camera de surveillance",
-    ],
-    "Jeux video": [
-        "console de jeux", "manette de jeu", "casque gaming",
-    ],
-    "Accessoires": [
-        "chargeur rapide", "cable usb-c", "batterie externe", "coque smartphone",
-        "hub usb",
-    ],
-}
-TECH_PAGES = 2            # pages par sous-catégorie
+# Semaine du Black Friday 2025 (dates AAAA-MM-JJ : elles se comparent comme du texte)
+BF_DEBUT = "2025-11-24"
+BF_FIN = "2025-11-30"
